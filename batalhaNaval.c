@@ -1,8 +1,86 @@
 #include <stdio.h>
+#include <string.h>
 
 // Desafio Batalha Naval - MateCheck
 // Este código inicial serve como base para o desenvolvimento do sistema de Batalha Naval.
 // Siga os comentários para implementar cada parte do desafio.
+
+typedef struct Coordenada{
+    int linha;
+    int coluna;
+} Coordenada;
+
+void ClearConsole()
+{
+    //Limpa o console
+    #ifdef _WIN32 //Forma melhorada para detectar o OS e limpar
+        system("cls");
+    #else
+        system("clear");
+    #endif
+}
+
+
+
+Coordenada ObterCoordenada(char coord[3])
+{
+    Coordenada c;
+
+    c.coluna  = coord[0] - 'A';
+    c.linha = coord[1] - '1';
+
+    return c;
+}
+
+void PosicionarNavio(Coordenada coordenada ,int navio[3]
+    ,int tamanho_tab, int tabuleirox[tamanho_tab][tamanho_tab], int vertical)
+{
+    for(int i = coordenada.linha; i < tamanho_tab; i++)
+        for(int j = coordenada.coluna; j < tamanho_tab; j++)
+            if(tabuleirox[i][j] != 0 )
+            {
+                printf("Coordenada do Navio inválida!!\nPosição dada ocupada ou fora dos limites");
+                printf("\nTente outra coordenada, ok?!");
+                return;
+            }
+    
+    if (vertical)
+    {
+        for (int i = 0; i < 3; i++)
+            tabuleirox[coordenada.linha + i][coordenada.coluna] = 3;
+    }
+    else
+    {
+        for (int i = 0; i < 3; i++)
+            tabuleirox[coordenada.linha][coordenada.coluna + i] = 3;
+    }
+}
+
+void VerTabuleiro(int tab, int tabuleirox[tab][tab])
+{
+    //Limpa o console
+    //ClearConsole();
+
+    //Printar
+    printf("-------TABULEIRO NAVAL-------\n\n    ");
+            
+    for(int i = 0; i < tab; i++)
+        printf(" %c ", 'A' + i); //Printa cada caractere por código em byte/int e vai adicionando para printar conforme cresce o número!
+
+    printf("\n----------------------------------");
+    
+    for(int i = 0; i < tab; i++)
+    {
+        printf("\n%d %s|", i+1, i +1 > 9 ? "" : " ");
+        for(int j = 0; j < tab; j++)
+        {
+            printf(" %d ", tabuleirox[i][j]);
+        }
+    }
+    printf("\n\n");
+
+
+}
 
 int main() {
     // Nível Novato - Posicionamento dos Navios
@@ -36,5 +114,43 @@ int main() {
     // 1 1 1 1 1
     // 0 0 1 0 0
 
+    //Limpa o console
+    ClearConsole();
+
+    //Créditos
+    printf("Jogo de Batalha Naval - Estácio\nMiguel Ass. Queiroz(Bit.Raiden) - 2026\n\n");
+
+    //Tabuleiro Naval
+    int tamanho_tab = 10; //Em linhas e colunas(mesma quantia)
+    int tabuleiro[tamanho_tab][tamanho_tab];
+
+    //Navio Horizontal
+    int navio_H[3] = {3,3,3}; 
+
+    //Navio Vertical
+    int navio_V[3][1] = {   
+     {3},
+     {3},
+     {3}     
+    };
+
+    //Inicializar o Tabuleiro
+    for(int i = 0; i < tamanho_tab; i++)
+        for(int j = 0; j < tamanho_tab; j++)
+            tabuleiro[i][j] = 0; // 0 --> ÁGUA
+
+    //Coordenadas
+    Coordenada Navio_H = ObterCoordenada("A1");
+    Coordenada Navio_V = ObterCoordenada("E3");
+
+    //Posicionar os Navios
+    if(Navio_H.linha <= tamanho_tab - 3 && Navio_H.coluna <= tamanho_tab - 3)
+        PosicionarNavio(Navio_H, navio_H, tamanho_tab, tabuleiro, 0); //Horizontal
+    if(Navio_V.linha <= tamanho_tab - 3 && Navio_V.coluna <= tamanho_tab - 3)
+        PosicionarNavio(Navio_V, navio_V, tamanho_tab, tabuleiro, 1); //Vertical
+    
+    VerTabuleiro(tamanho_tab, tabuleiro);
     return 0;
 }
+
+
