@@ -8,6 +8,7 @@
 typedef struct Coordenada{
     int linha;
     int coluna;
+    char diagonal[4];
 } Coordenada;
 
 void ClearConsole()
@@ -20,8 +21,6 @@ void ClearConsole()
     #endif
 }
 
-
-
 Coordenada ObterCoordenada(char coord[3])
 {
     Coordenada c;
@@ -31,18 +30,39 @@ Coordenada ObterCoordenada(char coord[3])
 
     return c;
 }
+Coordenada ObterCoordenadaDiagonal(char coord_diagonal[4])
+{
+    Coordenada co;
 
-void PosicionarNavio(Coordenada coordenada ,int navio[3]
+    strcpy(co.diagonal, coord_diagonal);
+
+    return co;
+}
+
+int PosicionarNavio(Coordenada coordenada ,int navio[3]
     ,int tamanho_tab, int tabuleirox[tamanho_tab][tamanho_tab], int vertical)
 {
-    for(int i = coordenada.linha; i < tamanho_tab; i++)
-        for(int j = coordenada.coluna; j < tamanho_tab; j++)
-            if(tabuleirox[i][j] != 0 )
-            {
-                printf("Coordenada do Navio inválida!!\nPosição dada ocupada ou fora dos limites");
-                printf("\nTente outra coordenada, ok?!");
-                return;
-            }
+    //Verificar sobreposição dos navios já existentes  - Horizontal
+    if(vertical==0)
+    for (int j = 0; j < 3; j++)
+    {
+        if (tabuleirox[coordenada.linha][coordenada.coluna + j] != 0)
+        {
+            printf("Coordenada do Navio inválida!!\nPosição ocupada");
+            return -1;
+        }
+    }
+            
+    //Verificar sobreposição dos navios já existentes  - Vertical
+    if(vertical==1)
+    for (int i = 0; i < 3; i++)
+    {
+        if (tabuleirox[coordenada.linha + i][coordenada.coluna] != 0)
+        {
+            printf("Coordenada do Navio inválida!!\nPosição ocupada");
+            return -1;
+        }
+    }
     
     if (vertical)
     {
@@ -54,6 +74,46 @@ void PosicionarNavio(Coordenada coordenada ,int navio[3]
         for (int i = 0; i < 3; i++)
             tabuleirox[coordenada.linha][coordenada.coluna + i] = 3;
     }
+    return 0;
+}
+int PosicionarNavioDiagonal(Coordenada coordenada , int tamanho_tab, int tabuleirox[tamanho_tab][tamanho_tab])
+{
+    //Verificar sobreposição dos navios já existentes
+    //Principal
+    int diagonal_p_livre = 0;
+    for(int i = 0; i< tamanho_tab; i++)
+        if(tabuleirox[i][i] != 3)
+            diagonal_p_livre = 1;
+    
+    //Secundária
+    int diagonal_s_livre = 0;
+    for(int i = tamanho_tab; i>0; i--)
+        if(tabuleirox[i][i] != 3)
+            diagonal_s_livre = 1;
+    
+    if (strcmp(coordenada.diagonal, "p") == 0)
+    {
+        if(diagonal_p_livre==0){
+            printf("Diagonal(is) %s já ocupada!!\n", diagonal_p_livre == 0 ? "p":"s");
+            printf("\nTente outra diagonal, ok?!");
+            return -1;
+        }
+
+        for(int i = 0; i< tamanho_tab; i++)
+            tabuleirox[i][i] = 3;
+    }
+    else if(strcmp(coordenada.diagonal, "s") == 0)
+    {
+        if(diagonal_s_livre==0){
+            printf("Diagonal(is) %s já ocupada!!\n", diagonal_p_livre == 0 ? "p":"s");
+            printf("\nTente outra diagonal, ok?!");
+            return -1;
+        }
+
+        for (int i = 0; i < tamanho_tab; i++)
+            tabuleirox[i][tamanho_tab - 1 - i] = 3;
+    }
+    return 0;
 }
 
 void VerTabuleiro(int tab, int tabuleirox[tab][tab])
@@ -140,16 +200,23 @@ int main() {
             tabuleiro[i][j] = 0; // 0 --> ÁGUA
 
     //Coordenadas
-    Coordenada Navio_H = ObterCoordenada("A1");
-    Coordenada Navio_V = ObterCoordenada("E3");
+    Coordenada Navio_H = ObterCoordenada("E9");
+    Coordenada Navio_V = ObterCoordenada("F1");
+    Coordenada Navio_DP = ObterCoordenadaDiagonal("p");
+    Coordenada Navio_DS = ObterCoordenadaDiagonal("s");
 
-    //Posicionar os Navios
-    if(Navio_H.linha <= tamanho_tab - 3 && Navio_H.coluna <= tamanho_tab - 3)
-        PosicionarNavio(Navio_H, navio_H, tamanho_tab, tabuleiro, 0); //Horizontal
-    if(Navio_V.linha <= tamanho_tab - 3 && Navio_V.coluna <= tamanho_tab - 3)
-        PosicionarNavio(Navio_V, navio_V, tamanho_tab, tabuleiro, 1); //Vertical
-    
-    VerTabuleiro(tamanho_tab, tabuleiro);
+    int posicionar_result = 0; //Boolean
+
+    //Posicionar os Navios e Validar tamanho do Navio e coordenada dentro dos Limites do Tabuleiro
+    posicionar_result = PosicionarNavio(Navio_H, navio_H, tamanho_tab, tabuleiro, 0); //Horizontal
+    posicionar_result = posicionar_result | PosicionarNavio(Navio_V, navio_V, tamanho_tab, tabuleiro, 1); //Vertical
+
+    //Posicionar os Navios Diagonais e Validar Limites
+    PosicionarNavioDiagonal(Navio_DP, tamanho_tab, tabuleiro);   //Principal
+    PosicionarNavioDiagonal(Navio_DS, tamanho_tab, tabuleiro);   //Secundária
+
+    if(posicionar_result==0)
+        VerTabuleiro(tamanho_tab, tabuleiro);
     return 0;
 }
 
