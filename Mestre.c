@@ -116,6 +116,32 @@ int PosicionarNavioDiagonal(Coordenada coordenada , int tamanho_tab, int tabulei
     return 0;
 }
 
+int AtivarHabilidade(
+    Coordenada hab,
+    int hab_linhas,
+    int hab_colunas,
+    int habilidade[hab_linhas][hab_colunas],
+    int tamanho_tab,
+    int tabuleiro[tamanho_tab][tamanho_tab]
+)
+{
+
+    //Validar limites
+    if(hab.coluna > (tamanho_tab - hab_colunas) || hab.linha > (tamanho_tab - hab_linhas))
+    {
+        printf("Habilidade fora dos limites do tabuleiro!\n");
+        return -1;
+    }
+            
+
+    //Aplicar habilidade
+    for(int i = hab.linha; i < hab_linhas+hab.linha; i++)
+        for(int j = hab.coluna; j < hab_colunas+hab.coluna; j++)
+                tabuleiro[i][j] = habilidade[i-hab.linha][j-hab.coluna];
+
+    return 0;
+}
+
 void VerTabuleiro(int tab, int tabuleirox[tab][tab])
 {
     //Limpa o console
@@ -194,6 +220,25 @@ int main() {
      {3}     
     };
 
+    //Habilidades
+    int Cone[3][5] = {
+        {0,0,1,0,0},
+        {0,1,1,1,0},
+        {1,1,1,1,1}
+    };
+
+    int Cruz[3][5] = {
+        {0,0,2,0,0},
+        {2,2,2,2,2},
+        {0,0,2,0,0}
+    };
+
+    int Octaedro[3][5] = {
+        {0,0,4,0,0},
+        {0,4,4,4,0},
+        {0,0,4,0,0}
+    };
+
     //Inicializar o Tabuleiro
     for(int i = 0; i < tamanho_tab; i++)
         for(int j = 0; j < tamanho_tab; j++)
@@ -202,8 +247,6 @@ int main() {
     //Coordenadas
     Coordenada Navio_H = ObterCoordenada("E9");
     Coordenada Navio_V = ObterCoordenada("F1");
-    Coordenada Navio_DP = ObterCoordenadaDiagonal("p");
-    Coordenada Navio_DS = ObterCoordenadaDiagonal("s");
 
     int posicionar_result = 0; //Boolean
 
@@ -211,9 +254,14 @@ int main() {
     posicionar_result = PosicionarNavio(Navio_H, navio_H, tamanho_tab, tabuleiro, 0); //Horizontal
     posicionar_result = posicionar_result | PosicionarNavio(Navio_V, navio_V, tamanho_tab, tabuleiro, 1); //Vertical
 
-    //Posicionar os Navios Diagonais e Validar Limites
-    PosicionarNavioDiagonal(Navio_DP, tamanho_tab, tabuleiro);   //Principal
-    PosicionarNavioDiagonal(Navio_DS, tamanho_tab, tabuleiro);   //Secundária
+    //Ativar Habilidades
+    Coordenada cone_ = ObterCoordenada("A1");
+    Coordenada cruz_ = ObterCoordenada("E4");
+    Coordenada octaedro_ = ObterCoordenada("B8");
+
+    AtivarHabilidade(cone_, 3, 5, Cone, tamanho_tab, tabuleiro); //Cone
+    AtivarHabilidade(cruz_, 3, 5, Cruz, tamanho_tab, tabuleiro); //Cruz
+    AtivarHabilidade(octaedro_, 3, 5, Octaedro, tamanho_tab, tabuleiro); //Octaedro
 
     if(posicionar_result==0)
         VerTabuleiro(tamanho_tab, tabuleiro);
